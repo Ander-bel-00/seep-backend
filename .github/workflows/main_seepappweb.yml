@@ -42,6 +42,8 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -51,6 +53,13 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D8294C226BD7442D908FD616F7EAFE3B }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_57804A62AA794ED3B2DC1815B5EBD747 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_608039A9C7CC424E90BFAE9F29161BD7 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -58,5 +67,5 @@ jobs:
         with:
           app-name: 'seepappweb'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B092022DBFA409FB5C76ACB050E4A12 }}
           package: .
+          
