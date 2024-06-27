@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro en el Sistema de Evaluación de Etapa Productiva</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333333;
+            margin-top: 0;
+        }
+
+        p, li {
+            color: #666666;
+            margin-bottom: 10px;
+        }
+
+        strong {
+            font-weight: bold;
+            color: #000000;
+        }
+
+        ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .email-content {
+            margin-bottom: 30px;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #888888;
+        }
+
+        /* Estilos específicos para el contenido del correo */
+        .email-content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro en el Sistema de Evaluación de Etapa Productiva</h1>
+        <div class="email-content">
+            <p>Estimado(a) <strong>{{nombreUsuario}}</strong>,</p>
+            <p>Le informamos que ha sido registrado en el sistema S.E.E.P, en el cual se le hará seguimiento de su etapa productiva. A continuación, encontrará los datos para iniciar sesión en el sistema:</p>
+            <ul>
+                <li><strong>Usuario:</strong> {{numeroDocumento}}</li>
+                <li><strong>Contraseña Temporal:</strong> {{contrasenaUsuario}}</li>
+            </ul>
+        </div>
+        <div class="footer">
+            <p>Atentamente,</p>
+            <p>El equipo de SEEP</p>
+        </div>
+    </div>
+</body>
+</html>

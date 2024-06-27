@@ -1,0 +1,1 @@
+--Aquí irá los archivos de bitácoras cargadas
