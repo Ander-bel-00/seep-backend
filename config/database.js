@@ -3,7 +3,7 @@ const { Sequelize } = require('sequelize');
 const Database = process.env.DATABASE || "seep";
 const User = process.env.USER || "Ander";
 const Password = process.env.PASSWORD || "Ab%12345";
-const Host = process.env.DBHOST || 'seep-db.mysql.database.azure.com';
+const Host = process.env.DBHOST || 'seep-db-server.mysql.database.azure.com';
 
 const sequelize = new Sequelize(Database, User, Password, {
   host: Host,
