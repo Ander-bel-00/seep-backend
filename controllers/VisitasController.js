@@ -24,19 +24,19 @@ exports.crearEvento = async (req, res) => {
 
     if (aprendices) {
       // Verificar si hay una visita agendada en el mismo día con horas posteriores
-      const visitaPrevia = await Visitas.findOne({
-        where: {
-          aprendiz: id_aprendiz,
-          fecha: fecha,
-        },
-      });
+      // const visitaPrevia = await Visitas.findOne({
+      //   where: {
+      //     aprendiz: id_aprendiz,
+      //     fecha: fecha,
+      //   },
+      // });
 
-      if (visitaPrevia) {
-        return res.status(400).json({
-          error:
-            "No se pueden agendar varias visitas en un día a un mismo aprendiz",
-        });
-      }
+      // if (visitaPrevia) {
+      //   return res.status(400).json({
+      //     error:
+      //       "No se pueden agendar varias visitas en un día a un mismo aprendiz",
+      //   });
+      // }
 
       // Verificar si hay una visita agendada en la misma fecha y hora que otra visita existente
       const visitaExistente = await Visitas.findOne({

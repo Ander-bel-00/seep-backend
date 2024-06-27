@@ -88,7 +88,6 @@ exports.iniciarSesion = async (req, res, next) => {
 // Función para obtener usuario por número de documento y rol
 async function obtenerUsuarioPorNumeroDocumento(numero_documento) {
   let usuario;
-  // Busca al usuario en todas las colecciones sin importar el rol
   usuario = await Aprendiz.findOne({ where: { numero_documento } });
   if (!usuario) {
     usuario = await Admin.findOne({ where: { numero_documento } });
@@ -147,73 +146,32 @@ exports.solicitarRestablecimientoContrasena = async (req, res, next) => {
   try {
     const { numero_documento, correo_electronico1 } = req.body;
 
-    // Verificar si el usuario existe en la base de datos
     const usuario = await obtenerUsuarioPorNumeroDocumento(numero_documento);
 
     if (!usuario) {
-      return res
-        .status(404)
-        .json({
-          mensaje:
-            "No se encontró ninguna cuenta asociada a este número de documento",
-        });
+      return res.status(404).json({ mensaje: "No se encontró ninguna cuenta asociada a este número de documento" });
     }
 
-    // Verificar si se proporcionó un correo electrónico válido
     if (!correo_electronico1) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "El correo electrónico es requerido para restablecer la contraseña",
-        });
+      return res.status(400).json({ mensaje: "El correo electrónico es requerido para restablecer la contraseña" });
     }
 
-    // Generar y enviar el código de verificación por correo electrónico
-    const codigoVerificacion = generarCodigoVerificacion(); // Aquí estás generando el código de verificación
-    // Llamar a la función para cargar y compilar la plantilla de solicitud de restablecimiento de contraseña
+    const codigoVerificacion = generarCodigoVerificacion();
     const datosPlantilla = {
-      nombreUsuario: usuario.nombres, // Utiliza el nombre del usuario
-      codigoVerificacion: codigoVerificacion, // Utiliza el código de verificación generado
+      nombreUsuario: usuario.nombres,
+      codigoVerificacion
     };
-    const cuerpoCorreo =
-      plantillasController.cargarPlantillaResetPasswordRequest(datosPlantilla);
+    const cuerpoCorreo = plantillasController.cargarPlantillaResetPasswordRequest(datosPlantilla);
 
-    // Lógica para enviar el correo electrónico con el cuerpo generado
-    await enviarCorreo(
-      correo_electronico1,
-      "S.E.E.P-Código de Verificación para Restablecimiento de Contraseña",
-      cuerpoCorreo
-    );
+    await enviarCorreo(correo_electronico1, "S.E.E.P-Código de Verificación para Restablecimiento de Contraseña", cuerpoCorreo);
 
-    // Almacenar temporalmente la información del usuario y el código de verificación
-    codigosVerificacion[correo_electronico1] = {
-      codigoVerificacion,
-      usuario,
-    };
+    codigosVerificacion[correo_electronico1] = { codigoVerificacion, usuario };
 
-    // Guardar el correo electrónico en la sesión
-    if (typeof req.session === "object" && req.session !== null) {
-      req.session.correoElectronico = correo_electronico1;
-    } else {
-      console.error("Error: req.session no está disponible");
-      // Manejar el caso en que req.session no está disponible
-    }
-
-    res.json({
-      mensaje:
-        "Se ha enviado un código de verificación al correo electrónico asociado a este usuario",
-    });
+    res.json({ mensaje: "Se ha enviado un código de verificación al correo electrónico asociado a este usuario" });
   } catch (error) {
     console.error("Error al solicitar la recuperación de contraseña:", error);
-    res
-      .status(500)
-      .json({
-        mensaje:
-          "Hubo un error al procesar la solicitud de restablecimiento de contraseña",
-        error,
-      });
-    next(error); // Pasa el error al siguiente middleware para su gestión
+    res.status(500).json({ mensaje: "Hubo un error al procesar la solicitud de restablecimiento de contraseña", error });
+    next(error);
   }
 };
 
@@ -254,40 +212,16 @@ exports.verificarCorreoElectronico = async (req, res, next) => {
 // En el controlador de autenticación authController
 exports.verificarCodigo = async (req, res, next) => {
   try {
-    const { codigo_verificacion } = req.body;
+    const { correo_electronico1, codigo_verificacion } = req.body;
 
-    // Recuperar el correo electrónico de la variable de sesión
-    const correo_electronico = req.session.correoElectronico;
-
-    // Verificar si el código de verificación es válido
-    if (!correo_electronico || !codigosVerificacion[correo_electronico]) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "No se encontró ningún código de verificación asociado a este usuario",
-        });
+    if (!codigosVerificacion[correo_electronico1] || codigosVerificacion[correo_electronico1].codigoVerificacion !== parseInt(codigo_verificacion)) {
+      return res.status(400).json({ mensaje: "El código de verificación es incorrecto" });
     }
 
-    if (
-      codigosVerificacion[correo_electronico].codigoVerificacion !==
-      parseInt(codigo_verificacion)
-    ) {
-      return res
-        .status(400)
-        .json({ mensaje: "El código de verificación es incorrecto" });
-    }
-
-    // Si el código de verificación es válido, enviar una respuesta exitosa
     res.json({ mensaje: "Código de verificación válido" });
   } catch (error) {
     console.error("Error al verificar el código de verificación:", error);
-    res
-      .status(500)
-      .json({
-        mensaje: "Hubo un error al verificar el código de verificación",
-        error,
-      });
+    res.status(500).json({ mensaje: "Hubo un error al verificar el código de verificación", error });
     next();
   }
 };
@@ -295,66 +229,28 @@ exports.verificarCodigo = async (req, res, next) => {
 // En el controlador de cambio de contraseña
 exports.cambiarContrasena = async (req, res, next) => {
   try {
-    const { codigo_verificacion, nueva_contrasena } = req.body;
+    const { correo_electronico1, codigo_verificacion, nueva_contrasena } = req.body;
 
-    // Recuperar el correo electrónico de la variable de sesión
-    const correo_electronico = req.session.correoElectronico;
-
-    // Verificar si el código de verificación es válido
-    if (!correo_electronico || !codigosVerificacion[correo_electronico]) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "No se encontró ningún código de verificación asociado a este usuario",
-        });
+    if (!codigosVerificacion[correo_electronico1] || codigosVerificacion[correo_electronico1].codigoVerificacion !== parseInt(codigo_verificacion)) {
+      return res.status(400).json({ mensaje: "El código de verificación es incorrecto" });
     }
 
-    if (
-      codigosVerificacion[correo_electronico].codigoVerificacion !==
-      parseInt(codigo_verificacion)
-    ) {
-      return res
-        .status(400)
-        .json({ mensaje: "El código de verificación es incorrecto" });
-    }
-
-    // Obtener el usuario de la información almacenada temporalmente
-    const usuario = codigosVerificacion[correo_electronico].usuario;
-
-    // Cifrar la nueva contraseña antes de guardarla en la base de datos
+    const usuario = codigosVerificacion[correo_electronico1].usuario;
     const nuevaContrasenaCifrada = await bcrypt.hash(nueva_contrasena, 10);
-
-    // Actualizar la contraseña del usuario en la base de datos con la nueva contraseña cifrada
     usuario.contrasena = nuevaContrasenaCifrada;
     await usuario.save();
 
-    // Eliminar el código de verificación
-    delete codigosVerificacion[correo_electronico];
+    delete codigosVerificacion[correo_electronico1];
 
-    // Llamar a la función para cargar y compilar la plantilla de solicitud de restablecimiento de contraseña
-    const datosPlantilla = {
-      nombreUsuario: usuario.nombres, // Utiliza el nombre del usuario
-    };
-    const cuerpoCorreo =
-      plantillasController.ChangePasswordTemplate(datosPlantilla);
+    const datosPlantilla = { nombreUsuario: usuario.nombres };
+    const cuerpoCorreo = plantillasController.ChangePasswordTemplate(datosPlantilla);
 
-    // Envía un correo de confirmación de cambio de contraseña
-    await enviarCorreo(
-      correo_electronico,
-      "S.E.E.P-Contraseña Restablecida Exitosamente",
-      cuerpoCorreo
-    );
-
-    // Eliminar el correo electrónico de la variable de sesión
-    delete req.session.correoElectronico;
+    await enviarCorreo(correo_electronico1, "S.E.E.P-Contraseña Restablecida Exitosamente", cuerpoCorreo);
 
     res.json({ mensaje: "Contraseña restablecida exitosamente" });
   } catch (error) {
     console.error("Error al restablecer la contraseña:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Hubo un error al cambiar la contraseña", error });
+    res.status(500).json({ mensaje: "Hubo un error al cambiar la contraseña", error });
     next();
   }
 };
