@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"No test specified\"",
-    "start": "node ./index.js",
-    "dev": "nodemon ./index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [
     "nodeJS",
