@@ -14,6 +14,7 @@ exports.crearEvento = async (req, res) => {
     hora_fin,
     lugar_visita,
     modalidad_visita,
+    estado
   } = req.body;
 
   try {
@@ -24,19 +25,20 @@ exports.crearEvento = async (req, res) => {
 
     if (aprendices) {
       // Verificar si hay una visita agendada en el mismo día con horas posteriores
-      // const visitaPrevia = await Visitas.findOne({
-      //   where: {
-      //     aprendiz: id_aprendiz,
-      //     fecha: fecha,
-      //   },
-      // });
+      const visitaPrevia = await Visitas.findOne({
+        where: {
+          aprendiz: id_aprendiz,
+          fecha: fecha,
+          estado: 'activo'
+        },
+      });
 
-      // if (visitaPrevia) {
-      //   return res.status(400).json({
-      //     error:
-      //       "No se pueden agendar varias visitas en un día a un mismo aprendiz",
-      //   });
-      // }
+      if (visitaPrevia) {
+        return res.status(400).json({
+          error:
+            "No se pueden agendar varias visitas en un día a un mismo aprendiz",
+        });
+      }
 
       // Verificar si hay una visita agendada en la misma fecha y hora que otra visita existente
       const visitaExistente = await Visitas.findOne({
@@ -56,6 +58,7 @@ exports.crearEvento = async (req, res) => {
               hora_fin: { [Op.lte]: hora_fin }, // Verifica si la hora de fin de una visita existente es menor o igual a la hora de fin de la nueva visita
             }, // Si ambas condiciones son verdaderas, significa que la nueva visita se superpone completamente con una visita existente
           ],
+          estado: 'activo'
         },
       });
 
