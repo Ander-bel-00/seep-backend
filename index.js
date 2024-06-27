@@ -47,7 +47,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Rutas
 app.use('/', routes());
 
-const port = process.env.SERVERPORT || 5000;
+const port = process.env.PORT || 3000;
 
 // Sincronizar los modelos con la base de datos
 async function startServer() {
