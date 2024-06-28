@@ -91,6 +91,7 @@ exports.crearEvento = async (req, res) => {
         tipoVisita: tipo_visita,
         fechaVisita: fechaFormateada,
         horainicio: horaInicioFormateada,
+        LugarVisita: lugar_visita
       };
 
       const cuerpoCorreo =
