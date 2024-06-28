@@ -4,6 +4,12 @@ const moment = require("moment");
 const { Op } = require("sequelize");
 const enviarCorreo = require("../utils/enviarCorreo");
 const plantillasController = require("../controllers/templatesController");
+const Instructores = require("../models/Instructor");
+const {
+  Sequelize,
+  ValidationError: SequelizeValidationError,
+} = require("sequelize");
+
 
 exports.crearEvento = async (req, res) => {
   const id_aprendiz = req.params.id_aprendiz;
@@ -14,7 +20,7 @@ exports.crearEvento = async (req, res) => {
     hora_fin,
     lugar_visita,
     modalidad_visita,
-    estado
+    estado,
   } = req.body;
 
   try {
@@ -29,7 +35,7 @@ exports.crearEvento = async (req, res) => {
         where: {
           aprendiz: id_aprendiz,
           fecha: fecha,
-          estado: 'activo'
+          estado: "activo",
         },
       });
 
@@ -44,7 +50,8 @@ exports.crearEvento = async (req, res) => {
       const visitaExistente = await Visitas.findOne({
         where: {
           fecha: fecha, // Filtra visitas que tengan la misma fecha que la nueva visita
-          [Op.or]: [ // Usa el operador OR para combinar múltiples condiciones lógicas
+          [Op.or]: [
+            // Usa el operador OR para combinar múltiples condiciones lógicas
             {
               hora_inicio: { [Op.lte]: hora_inicio }, // Verifica si la hora de inicio de una visita existente es menor o igual a la hora de inicio de la nueva visita
               hora_fin: { [Op.gte]: hora_inicio }, // Verifica si la hora de fin de una visita existente es mayor o igual a la hora de inicio de la nueva visita
@@ -58,7 +65,7 @@ exports.crearEvento = async (req, res) => {
               hora_fin: { [Op.lte]: hora_fin }, // Verifica si la hora de fin de una visita existente es menor o igual a la hora de fin de la nueva visita
             }, // Si ambas condiciones son verdaderas, significa que la nueva visita se superpone completamente con una visita existente
           ],
-          estado: 'activo'
+          estado: "activo",
         },
       });
 
@@ -72,8 +79,12 @@ exports.crearEvento = async (req, res) => {
       const correo_electronico1 = aprendices.correo_electronico1;
 
       // Formatear la fecha y la hora usando moment.js
-      const fechaFormateada = moment(fecha).locale('es').format('D [de] MMMM [de] YYYY');
-      const horaInicioFormateada = moment(hora_inicio, 'HH:mm').format('hh:mm A');
+      const fechaFormateada = moment(fecha)
+        .locale("es")
+        .format("D [de] MMMM [de] YYYY");
+      const horaInicioFormateada = moment(hora_inicio, "HH:mm").format(
+        "hh:mm A"
+      );
 
       const datosPlantilla = {
         nombreUsuario: aprendices.nombres,
@@ -82,7 +93,8 @@ exports.crearEvento = async (req, res) => {
         horainicio: horaInicioFormateada,
       };
 
-      const cuerpoCorreo = plantillasController.VisitasPlantilla(datosPlantilla);
+      const cuerpoCorreo =
+        plantillasController.VisitasPlantilla(datosPlantilla);
 
       await enviarCorreo(
         correo_electronico1,
@@ -98,7 +110,7 @@ exports.crearEvento = async (req, res) => {
         hora_fin,
         lugar_visita,
         modalidad_visita,
-        estado: 'activo',  // Establecer el estado como activo al crear la visita
+        estado: "activo", // Establecer el estado como activo al crear la visita
         aprendiz: id_aprendiz,
       });
 
@@ -132,7 +144,7 @@ exports.obtenerEventosAprendiz = async (req, res) => {
     const visitas = await Visitas.findAll({
       where: {
         aprendiz: idAprendiz,
-        estado: 'activo'
+        estado: "activo",
       },
     });
     if (visitas) {
@@ -197,18 +209,52 @@ exports.cancelarEvento = async (req, res) => {
     const { motivo_cancelacion } = req.body;
 
     const visita = await Visitas.findOne({
-      where: { id_visita: idVisita }
+      where: { id_visita: idVisita },
+    });
+
+    const aprendiz = await Aprendices.findOne({
+      where: {
+        id_aprendiz: visita.aprendiz,
+      },
+    });
+
+    const instructor = await Instructores.findOne({
+      where: {
+        fichas_asignadas: {
+          [Sequelize.Op.like]: `%${aprendiz.numero_ficha}%`,
+        },
+      },
     });
 
     if (visita) {
       visita.motivo_cancelacion = motivo_cancelacion;
-      visita.estado = 'cancelado';
+      visita.estado = "cancelado";
+      const correo_electronico1 = aprendiz.correo_electronico1;
+
+      const datosPlantilla = {
+        nombreUsuario: aprendiz.nombres,
+        nombreInstructor: instructor.nombres,
+        tipoVisita: visita.tipo_visita,
+        motivo_cancelacion: visita.motivo_cancelacion,
+        correoInstructor: instructor.correo_electronico1
+      };
+      const cuerpoCorreo =
+        plantillasController.CancelarVisitaPlantilla(datosPlantilla);
+
+      await enviarCorreo(
+        correo_electronico1,
+        "S.E.E.P-Su visita ha sido cancelada",
+        cuerpoCorreo
+      );
+      
       await visita.save();
+
       res.json({ mensaje: "La visita se ha cancelado" });
     } else {
       res.status(404).json({ mensaje: "Visita no encontrada" });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 };

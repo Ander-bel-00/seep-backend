@@ -2,7 +2,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visita Agendada</title>
+    <title>Cancelación de Visita</title>
     <style>
       /* Estilos generales */ body { font-family: Arial, sans-serif;
       background-color: #f5f5f5; margin: 0; padding: 20px; } .container {
@@ -19,19 +19,19 @@
   </head>
   <body>
     <div class="container">
-      <h1>Se te ha agendado tu {{tipoVisita}}</h1>
+      <h1>Se ha cancelado tu {{tipoVisita}}</h1>
       <div class="email-content">
         <p>Estimado(a) <strong>{{nombreUsuario}}</strong>,</p>
-        <p>Le informamos que ha agendado su
-          {{tipoVisita}}
-          para el día
-          {{fechaVisita}}
-          a las
-          {{horainicio}}, esperamos puntual asistencia.</p>
+        <p>Le informamos que su visita ha sido cancelada.<br />
+        </p>
+        <p>
+          <strong>Motivo:</strong>
+          {{motivo_cancelacion}}.
+        </p>
       </div>
       <div class="footer">
-        <p>Atentamente,</p>
-        <p>El equipo de SEEP</p>
+        <p>Atentamente, {{nombreInstructor}} instructor de etapa práctica</p>
+        <p>Para más información comunicarse con: {{correoInstructor}}</p>
       </div>
     </div>
   </body>
