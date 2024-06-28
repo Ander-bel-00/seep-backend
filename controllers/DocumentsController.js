@@ -32,24 +32,20 @@ const storage = multer.diskStorage({
 
 // Configuración de multer para el manejo de la carga de archivos
 const upload = multer({
-  // Define el almacenamiento para los archivos
   storage: storage,
-  // Define un filtro de archivo para limitar los tipos de archivos permitidos
   fileFilter: function (req, file, cb) {
-    // Lista de extensiones de archivo permitidas
     const allowedFileTypes = [".pdf"];
-    // Obtiene la extensión del archivo cargado y la convierte a minúsculas
     const fileExtension = path.extname(file.originalname).toLowerCase();
-    // Verifica si la extensión del archivo está incluida en la lista de tipos de archivo permitidos
+    console.log(`File extension: ${fileExtension}`); // Log de la extensión del archivo
     if (allowedFileTypes.includes(fileExtension)) {
-      // Si la extensión está permitida, llama a la función de devolución de llamada con el indicador de que el archivo es válido
       cb(null, true);
     } else {
-      // Si la extensión no está permitida, llama a la función de devolución de llamada con un error
+      console.log(`File rejected: ${file.originalname}`); // Log del archivo rechazado
       cb(new Error("Solo se permiten archivos en PDF"));
     }
   },
-}).single("archivo"); // Indica que solo se aceptará un archivo con el campo 'archivo' en el formulario
+}).single("archivo");
+
 
 // Exporta una función asincrónica llamada cargarDocumento que recibe los objetos req (solicitud) y res (respuesta).
 exports.cargarDocumento = async (req, res) => {
