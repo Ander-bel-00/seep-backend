@@ -37,11 +37,13 @@ const upload = multer({
     const allowedFileTypes = [".xls", ".xlsx", ".gsheet"];
     // Obtiene la extensión del archivo cargado y la convierte a minúsculas
     const fileExtension = path.extname(file.originalname).toLowerCase();
+    console.log(`File extension: ${fileExtension}`); // Log de la extensión del archivo
     // Verifica si la extensión del archivo está incluida en la lista de tipos de archivo permitidos
     if (allowedFileTypes.includes(fileExtension)) {
       // Si la extensión está permitida, llama a la función de devolución de llamada con el indicador de que el archivo es válido
       cb(null, true);
     } else {
+      console.log(`File rejected: ${file.originalname}`); // Log del archivo rechazado
       // Si la extensión no está permitida, llama a la función de devolución de llamada con un error
       cb(
         new Error(
@@ -58,6 +60,7 @@ exports.cargarBitacora = async (req, res, next) => {
   upload(req, res, async function (err) {
     // Si hay un error en la carga del archivo, devuelve una respuesta de error
     if (err) {
+      console.log(err);
       return res.status(400).json({ mensaje: err.message });
     }
 
@@ -112,6 +115,7 @@ exports.cargarBitacora = async (req, res, next) => {
         bitacora: nuevaBitacora,
       });
     } catch (error) {
+      console.log(error);
       // Si ocurre un error durante el procesamiento de la bitácora, devuelve una respuesta de error
       return res
         .status(500)
