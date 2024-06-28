@@ -55,7 +55,7 @@ exports.iniciarSesion = async (req, res, next) => {
     );
     // Al final del inicio de sesión exitoso
     res.cookie("token", token, {
-        httpOnly: true, // Asegura que la cookie no sea accesible vía JavaScript
+        // httpOnly: true, // Asegura que la cookie no sea accesible vía JavaScript
         secure: process.env.NODE_ENV === "production", // Solo se envía a través de HTTPS en producción
         sameSite: 'None' // Esto es necesario para que las cookies se envíen en solicitudes entre sitios
     });    
