@@ -56,6 +56,7 @@ exports.cargarDocumento = async (req, res) => {
   try {
     upload(req, res, async function (err) {
       if (err) {
+        console.log(err);
         return res.status(400).json({ mensaje: err.message });
       }
 
@@ -100,6 +101,7 @@ exports.cargarDocumento = async (req, res) => {
       });
     });
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({ message: "Error al cargar el documento", error: error.message });
