@@ -80,7 +80,7 @@ exports.cargarBitacora = async (req, res, next) => {
         // Si ya existe una bitácora con el mismo número para este aprendiz, elimina el archivo subido y devuelve un mensaje de error
         fs.unlinkSync(req.file.path);
         return res.status(400).json({
-          mensaje: "Ya se ha subido una bitácora con ese mismo número",
+          mensaje: "Ya se ha cargado una bitácora con ese mismo número",
         });
       }
 
