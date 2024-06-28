@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'http://localhost:3001',
+    origin: 'https://seep-frontend.vercel.app',
     credentials: true
 };
 
