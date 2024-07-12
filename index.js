@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://seep-frontend.vercel.app',
+    origin: 'http://localhost:3000',
     credentials: true
 };
 
@@ -35,7 +35,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use('/', routes());
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 async function startServer() {
     try {

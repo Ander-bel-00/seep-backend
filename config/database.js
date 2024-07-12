@@ -1,12 +1,12 @@
 const { Sequelize } = require('sequelize');
 
 const Database = process.env.DATABASE || "seep";
-const User = process.env.USER || "Ander";
-const Password = process.env.PASSWORD || "Ab%12345";
+const User = process.env.USER || "root";
+const Password = process.env.PASSWORD || "root";
 const Host = process.env.DBHOST || 'seep-db-server.mysql.database.azure.com';
 
-const sequelize = new Sequelize(Database, User, Password, {
-  host: Host,
+const sequelize = new Sequelize("seep", "root", "root", {
+  host: 'localhost',
   dialect: 'mysql',
   port: process.env.PORTDB || 3306,
   dialectOptions: {
